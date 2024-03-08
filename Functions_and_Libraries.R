@@ -58,11 +58,12 @@ F_ARIMA <- function(df, estado, etanol, meses_teste, titulo, seed=1, remove_anos
   ev_test <- evaluate(model, output, prediction)
   
   #Plot results
-  save_image(train = io_train$output, test = io_test$output, adjust=adjust, prediction=prediction, 
-             date = TS_ORIGINAL$Data, state = estado, title = titulo, product = etanol) 
   yvalues <- c(io_train$output, io_test$output)
-  Data <- as.Date(TS_ORIGINAL$Data)
-  Data <- tail(Data, n=length(yvalues))
+  Date <- as.Date(TS_ORIGINAL$Data)
+  Date <- tail(Date, n=length(yvalues))
+  save_image(yvalues = yvalues, adjust=adjust, prediction=prediction, 
+             date = Date, state = estado, title = titulo, product = etanol) 
+  
   #grafico <- plot_ts_pred(x = Data, y=yvalues, yadj=adjust, ypre=prediction, color_adjust = "blue", color_prediction = "red") +
   #  theme(text = element_text(size=18)) +
   #  labs(title = paste0(titulo, " - Etanol ", etanol, " - ", estado, " Teste em ", max(year(Data))))
@@ -79,7 +80,7 @@ F_ARIMA <- function(df, estado, etanol, meses_teste, titulo, seed=1, remove_anos
   print(paste("test_R2 =", R2_Teste))
   
   #Output
-  saida <- data.frame(Estado = estado, Produto = etanol, Ano_Teste = max(year(Data)),Modelo = "ARIMA", preprocess = NA,
+  saida <- data.frame(Estado = estado, Produto = etanol, Ano_Teste = max(year(Date)),Modelo = "ARIMA", preprocess = NA,
                       R2_Treino= R2_Treino, R2_Teste = R2_Teste, 
                       Ordem = paste0("ARIMA(", model$p, "," , model$d , "," , model$q , ")"), best_sw = NA,
                       input_size = NA,
@@ -239,15 +240,12 @@ create_directories <- function(state) {
 }
 
 
-save_image <- function(train, test, adjust, prediction, date, state, title, product) {
+save_image <- function(yvalues, adjust, prediction, date, state, title, product) {
   # 1. Filename
   scenario = paste0(state, "_", product)
   title = paste0(title, " - ", state, " - ", product, " - Test Year: ", max(year(date)))
   jpeg(sprintf("graphics/%s/%s.jpg", scenario, title), width = 880, height = 480)
   # 2. Create the plot
-  yvalues <- c(train, test)
-  date <- as.Date(date)
-  date <- tail(date, n=length(yvalues))
   grf <- plot_ts_pred(x = date, y=yvalues, yadj=adjust, ypre=prediction, color_adjust = "blue", color_prediction = "red") +
     theme(text = element_text(size=18)) +
     labs(title = title)
