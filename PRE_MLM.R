@@ -70,7 +70,7 @@ create_directories(scenario)
 results_PRE_MLM <- data.frame()
 
 # Evaluation of PRE+MLM models
-results_PRE_MLM <- F_PRE_MLM(Estado="SP", TiposDeEtanol="hidratado", AnoTesteInicial=AnoTesteInicial, 
+results_PRE_MLM <- F_PRE_MLM(Estado = state, TiposDeEtanol = product, AnoTesteInicial=AnoTesteInicial, 
                        PRE_MLM=PRE_MLM, resultado=results_PRE_MLM)
 
 # Saving results

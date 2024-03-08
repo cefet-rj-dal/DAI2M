@@ -64,11 +64,6 @@ F_ARIMA <- function(df, estado, etanol, meses_teste, titulo, seed=1, remove_anos
   save_image(yvalues = yvalues, adjust=adjust, prediction=prediction, 
              date = Date, state = estado, title = titulo, product = etanol) 
   
-  #grafico <- plot_ts_pred(x = Data, y=yvalues, yadj=adjust, ypre=prediction, color_adjust = "blue", color_prediction = "red") +
-  #  theme(text = element_text(size=18)) +
-  #  labs(title = paste0(titulo, " - Etanol ", etanol, " - ", estado, " Teste em ", max(year(Data))))
-  #plot(grafico)
-  
   #Cálculo dos R2 de Treino e Teste
   R2_Treino <- 1 - sum((io_train$output - adjust)^2) / sum((io_train$output - mean(io_train$output))^2)
   print(paste("train_R2=", R2_Treino))
@@ -108,9 +103,9 @@ F_TSReg <- function(df, estado, etanol, meses_teste, sw_par, input_size, base_mo
   TS_ORIGINAL <- TS_ORIGINAL[TS_ORIGINAL$Estado_Sigla == estado, ]
   TS_ORIGINAL <- TS_ORIGINAL[1:(nrow(TS_ORIGINAL) - (12 * remove_anos_finais)),]
   
-  if(etanol == "hidratado"){
+  if(etanol == "hydrous"){
     x <- TS_ORIGINAL$PROD_ETANOL_HIDRATADO
-  }else if(etanol=="anidro"){
+  }else if(etanol=="anhydrous"){
     x <- TS_ORIGINAL$PROD_ETANOL_ANIDRO
   }else{print("PRODUTO NÃO ESPECIFICADO CORRETAMENTE!")}
   
@@ -157,12 +152,14 @@ F_TSReg <- function(df, estado, etanol, meses_teste, sw_par, input_size, base_mo
   
   # 6) Exibição do gráfico com os resultados
   yvalues <- c(io_train$output, io_test$output)
-  Data <- as.Date(TS_ORIGINAL$Data)
-  Data <- tail(Data, n=length(yvalues))
-  grafico <- plot_ts_pred(x = Data, y=yvalues, yadj=adjust, ypre=prediction, color_adjust = "blue", color_prediction = "red") +
-    theme(text = element_text(size=18)) +
-    labs(title = paste0(titulo, " - Etanol ", etanol, " - ", estado, " Teste em ", max(year(Data))))
-  plot(grafico)
+  Date <- as.Date(TS_ORIGINAL$Data)
+  Date <- tail(Date, n=length(yvalues))
+  save_image(yvalues = yvalues, adjust=adjust, prediction=prediction, 
+             date = Date, state = estado, title = titulo, product = etanol)
+  #grafico <- plot_ts_pred(x = Data, y=yvalues, yadj=adjust, ypre=prediction, color_adjust = "blue", color_prediction = "red") +
+  #  theme(text = element_text(size=18)) +
+  #  labs(title = paste0(titulo, " - Etanol ", etanol, " - ", estado, " Teste em ", max(year(Data))))
+  #plot(grafico)
   
   #Cálculo do R2
   R2_Treino <- 1 - sum((as.vector(io_train$output) - adjust)^2) / sum((as.vector(io_train$output) - mean(as.vector(io_train$output)))^2)
@@ -181,7 +178,7 @@ F_TSReg <- function(df, estado, etanol, meses_teste, sw_par, input_size, base_mo
   
   # 7) Retorno do modelo treinado e ajustado
   
-  saida <- data.frame(Estado = estado, Produto = etanol, Ano_Teste = max(year(Data)), Modelo = titulo, preprocess = class(model$preprocess)[1],
+  saida <- data.frame(Estado = estado, Produto = etanol, Ano_Teste = max(year(Date)), Modelo = titulo, preprocess = class(model$preprocess)[1],
                       R2_Treino= R2_Treino, R2_Teste = R2_Teste, 
                       best_sw = best_sw,
                       input_size = model$input_size, 
@@ -228,9 +225,9 @@ F_PRE_MLM <- function(Estado, TiposDeEtanol, AnoTesteInicial, PRE_MLM, resultado
 
 
 create_directories <- function(state) {
-  dir_name <- sprintf("%s/%s", "hyper", state)
-  if (!file.exists(dir_name))
-    dir.create(dir_name, recursive = TRUE)
+  #dir_name <- sprintf("%s/%s", "hyper", state)
+  #if (!file.exists(dir_name))
+  #  dir.create(dir_name, recursive = TRUE)
   dir_name <- sprintf("%s/%s", "graphics", state)
   if (!file.exists(dir_name))
     dir.create(dir_name, recursive = TRUE)
