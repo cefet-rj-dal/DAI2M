@@ -13,51 +13,19 @@ dataset <- read.csv2("data/Etanol_df.csv")
 
 
 ###############################################################################################################################
-# --- TRAIN AND TEST PARAMETERS --------------------------------------------------------------------------------------------- #
+# --- PARAMETERS ------------------------------------------------------------------------------------------------------------ #
 ###############################################################################################################################
-# a) General
+# a) General Params 
 meses_teste = 12
 remove_anos_finais = 0
 AnoTesteInicial = (max(year(as.Date(dataset$Data))))
 TiposDeEtanol <- c("hidratado", "anidro")
-
-# b) PRE+MLM
 sw_par=seq(9, 18, 3)
-input_size = c(1:10) #input size options should be between 1 and sw_size-2
+input_size = c(1:10)
 
-
-
-###############################################################################################################################
-# --- ARIMA TRAIN AND AVALIATION -------------------------------------------------------------------------------------------- #
-###############################################################################################################################
-# a) ARIMA Results' dataset creation
-results_ARIMA <- data.frame()
-
-Estados <- c("SP", "GO", "MG", "MT", "MS", "PR")
-
-# b) Train and Test
-for(Estado in Estados){
-  for(Tipo in TiposDeEtanol){
-    for(AnoTeste in (AnoTesteInicial-4):AnoTesteInicial){
-      titulo  <- paste0("ARIMA - Etanol ", Tipo, " - ", Estado, " - Teste em ", AnoTeste)
-      remove_anos_finais = max(year(dataset$Data)) - AnoTeste
-      result <- F_ARIMA(df = dataset, estado=Estado, etanol=Tipo, meses_teste = meses_teste, titulo = titulo, 
-                        seed=1, remove_anos_finais=remove_anos_finais)
-      print(result)
-      results_ARIMA <- rbind(results_ARIMA, result)
-    }}}
-
-# c) Saving ARIMA results dataset
-saveRDS(results_ARIMA, "results/results_ARIMA.RDS")
-
-
-
-################################################################################################################################
-# --- PRE+MLM TRAIN AND AVALIATION ------------------------------------------------------------------------------------------- #
-################################################################################################################################
-# a) Geração da lista com as opções PRE+MLM a serem avaliadas
+# b) Specific parameters
 PRE_MLM = list(
-  # an_mlm
+  # b1) an_mlm
   an_lstm   = list(base_model = ts_lstm(ts_norm_an()), ranges = list(epochs=700)),
   an_elm    = list(base_model = ts_elm(ts_norm_an()), ranges = list(nhid = 1:20, actfun=c('sig', 'radbas', 'tribas',
                                                                                           'relu', 'purelin'))),
@@ -66,7 +34,7 @@ PRE_MLM = list(
   an_mlp    = list(base_model = ts_mlp(ts_norm_an()), ranges = list(size = 1:10, decay = seq(0, 1, 1/20), maxit=700)),
   an_conv1d = list(base_model = ts_conv1d(ts_norm_an()), ranges = list(epochs=700)),
   
-  # diff_mlm
+  # b2) diff_mlm
   diff_lstm   = list(base_model = ts_lstm(ts_norm_diff()), ranges = list(epochs=700)),
   diff_elm    = list(base_model = ts_elm(ts_norm_diff()), ranges = list(nhid = 1:20, actfun=c('sig', 'radbas', 'tribas',
                                                                                               'relu', 'purelin'))),
@@ -74,7 +42,7 @@ PRE_MLM = list(
                                                                         epsilon=seq(0, 1, 1/20), cost=seq(1, 10, 1))),
   diff_mlp    = list(base_model = ts_mlp(ts_norm_diff()), ranges = list(size = 1:10, decay = seq(0, 1, 1/20), maxit=700)),
   diff_conv1d = list(base_model = ts_conv1d(ts_norm_diff()), ranges = list(epochs=700)),
-  # gmm_mlm
+  # b3) gmm_mlm
   gmm_lstm   = list(base_model = ts_lstm(ts_norm_gminmax()), ranges = list(epochs=700)),
   gmm_elm    = list(base_model = ts_elm(ts_norm_gminmax()), ranges = list(nhid = 1:20, actfun=c('sig', 'radbas', 'tribas',
                                                                                                 'relu', 'purelin'))),
@@ -84,16 +52,31 @@ PRE_MLM = list(
   gmm_conv1d = list(base_model = ts_conv1d(ts_norm_gminmax()), ranges = list(epochs=700))
 )
 
-# ---------------------------------------------------------------------------------------------------------------------------- #
-# 1) ESTADO:SP PRODUTO: HIDRATADO - TREINO E AVALIAÇÃO DOS MODELOS PRE+MLM
-# Recuperação dos resultados de etapas anteriores de treinamento / avaliação
-results_PRE_MLM <- data.frame()
-if(file.exists("results/results_PRE_MLM.RDS")){
-  results_PRE_MLM <- readRDS("results/results_PRE_MLM.RDS")}
 
-# Avaliação dos modelos PRE+MLM
+
+###############################################################################################################################
+# --- TRAINING AND TESTING SCENARIOS ---------------------------------------------------------------------------------------- #
+###############################################################################################################################
+
+# --------------------------------------------------------------------------------------------------------------------------- #
+# 1) STATE:SP | PRODUCT: HYDROUS ETHANOL
+state = "SP"
+product = "hydrous"
+
+scenario = paste0(state, "_", product)
+create_directories(scenario)
+
+# Retrieval of results from previous training/test steps
+results_PRE_MLM <- data.frame()
+
+# Evaluation of PRE+MLM models
 results_PRE_MLM <- F_PRE_MLM(Estado="SP", TiposDeEtanol="hidratado", AnoTesteInicial=AnoTesteInicial, 
                        PRE_MLM=PRE_MLM, resultado=results_PRE_MLM)
-# Gravação dos resultadoS
-saveRDS(results_PRE_MLM, "results/results_PRE_MLM.RDS")
 
+# Saving results
+filename <- sprintf("results/%s.RDS", scenario)
+saveRDS(results_PRE_MLM, filename)
+
+
+# --------------------------------------------------------------------------------------------------------------------------- #
+# 1) STATE:SP | PRODUCT: ANHYDROUS ETHANOL

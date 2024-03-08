@@ -21,7 +21,7 @@ F_ARIMA <- function(df, estado, etanol, meses_teste, titulo, seed=1, remove_anos
   TS_ORIGINAL <- TS_ORIGINAL[TS_ORIGINAL$Estado_Sigla == estado, ]
   TS_ORIGINAL <- TS_ORIGINAL[1:(nrow(TS_ORIGINAL) - (12 * remove_anos_finais)),]
   
-  if(etanol == "hidratado"){
+  if(etanol == "hydrous"){
     x <- TS_ORIGINAL$PROD_ETANOL_HIDRATADO
   }else {
     x <- TS_ORIGINAL$PROD_ETANOL_ANIDRO
@@ -38,12 +38,10 @@ F_ARIMA <- function(df, estado, etanol, meses_teste, titulo, seed=1, remove_anos
   #Treinamento do modelo ARIMA
   model <- ts_arima()     # Cria um objeto do tipo "modelo de regressão ARIMA"
   io_train <- ts_projection(samp$train)  # Cria um objeto do tipo do lista com a base de treino da TS (série temporal)
-  model <- fit(model, x=io_train$input, y=io_train$output)  # Ajusta o modelo de TS estimando os componentes subjacentes
-  # de tendência e sazonalidade
+  model <- fit(model, x=io_train$input, y=io_train$output)
   #Evaluation of adjustment
   adjust <- predict(model, io_train$input)
-  ev_adjust <- evaluate(model, io_train$output, adjust)    # Avalia as predições realizadas comparando as mesmas com a
-  # base de treino
+  ev_adjust <- evaluate(model, io_train$output, adjust)    # Avalia as predições realizadas comparando as mesmas com a base de treino
   
   #Prediction of test
   steps_ahead <- meses_teste  # Define a quantidade de predições a serem realizadas
@@ -60,15 +58,17 @@ F_ARIMA <- function(df, estado, etanol, meses_teste, titulo, seed=1, remove_anos
   ev_test <- evaluate(model, output, prediction)
   
   #Plot results
+  save_image(train = io_train$output, test = io_test$output, adjust=adjust, prediction=prediction, 
+             date = TS_ORIGINAL$Data, state = estado, title = titulo, product = etanol) 
   yvalues <- c(io_train$output, io_test$output)
   Data <- as.Date(TS_ORIGINAL$Data)
   Data <- tail(Data, n=length(yvalues))
-  grafico <- plot_ts_pred(x = Data, y=yvalues, yadj=adjust, ypre=prediction, color_adjust = "blue", color_prediction = "red") +
-    theme(text = element_text(size=18)) +
-    labs(title = titulo)
-  plot(grafico)
+  #grafico <- plot_ts_pred(x = Data, y=yvalues, yadj=adjust, ypre=prediction, color_adjust = "blue", color_prediction = "red") +
+  #  theme(text = element_text(size=18)) +
+  #  labs(title = paste0(titulo, " - Etanol ", etanol, " - ", estado, " Teste em ", max(year(Data))))
+  #plot(grafico)
   
-  #Cálculo do R2
+  #Cálculo dos R2 de Treino e Teste
   R2_Treino <- 1 - sum((io_train$output - adjust)^2) / sum((io_train$output - mean(io_train$output))^2)
   print(paste("train_R2=", R2_Treino))
   
@@ -197,6 +197,7 @@ F_TSReg <- function(df, estado, etanol, meses_teste, sw_par, input_size, base_mo
   return(saida)
 }
 
+
 F_PRE_MLM <- function(Estado, TiposDeEtanol, AnoTesteInicial, PRE_MLM, resultado){
   for(Tipo in TiposDeEtanol){
     for(AnoTeste in (AnoTesteInicial-4):AnoTesteInicial){
@@ -222,4 +223,35 @@ F_PRE_MLM <- function(Estado, TiposDeEtanol, AnoTesteInicial, PRE_MLM, resultado
   }
   saida <- resultado
   return(saida)
+}
+
+
+create_directories <- function(state) {
+  dir_name <- sprintf("%s/%s", "hyper", state)
+  if (!file.exists(dir_name))
+    dir.create(dir_name, recursive = TRUE)
+  dir_name <- sprintf("%s/%s", "graphics", state)
+  if (!file.exists(dir_name))
+    dir.create(dir_name, recursive = TRUE)
+  dir_name <- sprintf("%s", "results")
+  if (!file.exists(dir_name))
+    dir.create(dir_name, recursive = TRUE)
+}
+
+
+save_image <- function(train, test, adjust, prediction, date, state, title, product) {
+  # 1. Filename
+  scenario = paste0(state, "_", product)
+  title = paste0(title, " - ", state, " - ", product, " - Test Year: ", max(year(date)))
+  jpeg(sprintf("graphics/%s/%s.jpg", scenario, title), width = 880, height = 480)
+  # 2. Create the plot
+  yvalues <- c(train, test)
+  date <- as.Date(date)
+  date <- tail(date, n=length(yvalues))
+  grf <- plot_ts_pred(x = date, y=yvalues, yadj=adjust, ypre=prediction, color_adjust = "blue", color_prediction = "red") +
+    theme(text = element_text(size=18)) +
+    labs(title = title)
+  plot(grf)
+  # 3. Close the file
+  dev.off()
 }
