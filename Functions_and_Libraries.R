@@ -17,64 +17,71 @@ library(lubridate)
 
 F_ARIMA <- function(df, estado, etanol, meses_teste, titulo, seed=1, remove_anos_finais=0){
   set.seed(seed)
+  
+  # Selecting the producing state
   TS_ORIGINAL <- df
   TS_ORIGINAL <- TS_ORIGINAL[TS_ORIGINAL$Estado_Sigla == estado, ]
+  
+  # Excluding the final dataset period according to Rolling Forecast Origin strategy
   TS_ORIGINAL <- TS_ORIGINAL[1:(nrow(TS_ORIGINAL) - (12 * remove_anos_finais)),]
   
+  # Selecting the Correct Type of Ethanol and assembling the "x" vector
   if(etanol == "hydrous"){
     x <- TS_ORIGINAL$PROD_ETANOL_HIDRATADO
-  }else {
+  }else if(etanol=="anhydrous"){
     x <- TS_ORIGINAL$PROD_ETANOL_ANIDRO
-  }
+  }else{print("PRODUCT NOT SPECIFIED CORRECTLY")}
   
-  #sliding windows
-  sw_size <- 0 # Para ARIMA, sliding window precisa ser = 0
+  # Creating the TS
+  sw_size <- 0 # For ARIMA, sliding window needs to be = 0
   ts <- ts_data(x, sw_size)
   
-  #Segregação dos dados em treino e teste
-  test_size <- meses_teste
-  samp <- ts_sample(ts, test_size)
+  # Segregation of TS in training and testing
+  samp <- ts_sample(ts, meses_teste)
   
-  #Treinamento do modelo ARIMA
-  model <- ts_arima()     # Cria um objeto do tipo "modelo de regressão ARIMA"
-  io_train <- ts_projection(samp$train)  # Cria um objeto do tipo do lista com a base de treino da TS (série temporal)
+  # ARIMA model training
+  model <- ts_arima()
+  io_train <- ts_projection(samp$train)
   model <- fit(model, x=io_train$input, y=io_train$output)
+  
   #Evaluation of adjustment
   adjust <- predict(model, io_train$input)
-  ev_adjust <- evaluate(model, io_train$output, adjust)    # Avalia as predições realizadas comparando as mesmas com a base de treino
+  ev_adjust <- evaluate(model, io_train$output, adjust)
   
   #Prediction of test
-  steps_ahead <- meses_teste  # Define a quantidade de predições a serem realizadas
-  io_test <- ts_projection(samp$test)  # Cria um objeto do tipo do lista com a base de teste da TS
+  steps_ahead <- meses_teste
+  io_test <- ts_projection(samp$test)
   # Realiza a predição com base no modelo previamente treinado
   prediction <- predict(model, x=io_test$input, steps_ahead=steps_ahead)
   prediction <- as.vector(prediction)
   
-  output <- as.vector(io_test$output)
-  if (steps_ahead > 1)
-    output <- output[1:steps_ahead]
+  # TESTAR SE O TRECHO COMENTADO ABAIXO PODE SER EXCLUÍDO ######################################
+  #output <- as.vector(io_test$output)
+  #if (steps_ahead > 1)
+  #  output <- output[1:steps_ahead]
   
   #Evaluation of test data
-  ev_test <- evaluate(model, output, prediction)
+  #ev_test <- evaluate(model, output, prediction)
   
-  #Plot results
+  # Plotting result in a jpg file
   yvalues <- c(io_train$output, io_test$output)
   Date <- as.Date(TS_ORIGINAL$Data)
   Date <- tail(Date, n=length(yvalues))
   save_image(yvalues = yvalues, adjust=adjust, prediction=prediction, 
              date = Date, state = estado, title = titulo, product = etanol) 
   
-  #Cálculo dos R2 de Treino e Teste
+  # Calculating Training and Testing R2 metrics
   R2_Treino <- 1 - sum((io_train$output - adjust)^2) / sum((io_train$output - mean(io_train$output))^2)
   print(paste("train_R2=", R2_Treino))
   
   df  <- data.frame(real = as.vector(io_test$output), previsto = prediction)
-  df$ape <- abs((df$real - df$previsto)/df$real)
+  # EXCLUIR A LINHA ABAIXO!
+  #df$ape <- abs((df$real - df$previsto)/df$real)
   
   R2_Teste <- 1 - (sum(abs(df$real-df$previsto)^2) / sum((df$real - mean(df$real))^2))
   print(paste("test_R2 =", R2_Teste))
   
-  #Output
+  # Assembling the function output's dataset
   saida <- data.frame(Estado = estado, Produto = etanol, Ano_Teste = max(year(Date)),Modelo = "ARIMA", preprocess = NA,
                       R2_Treino= R2_Treino, R2_Teste = R2_Teste, 
                       Ordem = paste0("ARIMA(", model$p, "," , model$d , "," , model$q , ")"), best_sw = NA,
@@ -95,33 +102,48 @@ F_ARIMA <- function(df, estado, etanol, meses_teste, titulo, seed=1, remove_anos
 
 F_TSReg <- function(df, estado, etanol, meses_teste, sw_par, input_size, base_model, ranges, titulo, seed=1, remove_anos_finais=0){
   set.seed(seed)
-  # 1) Registra data e hora do início do treinamentyo
+  # Printing training start date and time
   print(paste("Início do treinamento:", format(Sys.time(), format = "%B %d, %Y %H:%M:%S")))
   
-  # 2) Carrega os dados da série temporal e associa os mesmos à variável x
+  # Selecting the producing state
   TS_ORIGINAL <- df
   TS_ORIGINAL <- TS_ORIGINAL[TS_ORIGINAL$Estado_Sigla == estado, ]
+  
+  # Excluding the final dataset period according to Rolling Forecast Origin strategy
   TS_ORIGINAL <- TS_ORIGINAL[1:(nrow(TS_ORIGINAL) - (12 * remove_anos_finais)),]
   
+  # Selecting the Correct Type of Ethanol and assembling the "x" vector
   if(etanol == "hydrous"){
     x <- TS_ORIGINAL$PROD_ETANOL_HIDRATADO
   }else if(etanol=="anhydrous"){
     x <- TS_ORIGINAL$PROD_ETANOL_ANIDRO
-  }else{print("PRODUTO NÃO ESPECIFICADO CORRETAMENTE!")}
+  }else{print("PRODUCT NOT SPECIFIED CORRECTLY")}
   
-  # 3)Ajuste do modelo, incluíndo a otimização do hiperparâmetro sliding window
+  # Model adjustment, including optimization of the sliding window hyperparameter
   best_R2  <-  0
   for (sw_size in sw_par){
+    # Creating the TS
     ts <- ts_data(x, sw_size)
+    
+    # Segregation of TS in training and testing
     samp <- ts_sample(ts, meses_teste)
+    
+    # Model tunning
     tune <- ts_tune(input_size=input_size, base_model = base_model)
+    # Model Training
     io_train <- ts_projection(samp$train)
-    ranges <- ranges
+    #ranges <- ranges   # EXCLUIR!
     model <- fit(tune, x=io_train$input, y=io_train$output, ranges)
+    
+    # Evaluation of adjustment
     adjust <- predict(model, io_train$input)
     ev_adjust <- evaluate(model, io_train$output, adjust)
+    
+    # Calculating Training R2 metric
     R2_Treino <- 1 - sum((as.vector(io_train$output) - adjust)^2) / sum((as.vector(io_train$output) - mean(as.vector(io_train$output)))^2)
     print(paste("R2 no treino", "para sw_size =", sw_size, "=", R2_Treino))
+    
+    # Registering the model with the best test R2
     if (best_R2 == 0) {
       best_R2 <- R2_Treino
       best_sw = sw_size
@@ -135,9 +157,11 @@ F_TSReg <- function(df, estado, etanol, meses_teste, sw_par, input_size, base_mo
     }
   }
   print(paste("best_sw =", best_sw))
+  
+  # Selecting for use the model with the best R2 training metric
   model  <-  best_model
   
-  # 4) Realização e avaliação das predições com o modelo ajustado
+  # Making and evaluating predictions with the adjusted model
   adjust <- predict(model, io_train$input)
   ev_adjust <- evaluate(model, io_train$output, adjust)
   steps_ahead <- meses_teste
@@ -150,23 +174,20 @@ F_TSReg <- function(df, estado, etanol, meses_teste, sw_par, input_size, base_mo
   
   ev_test <- evaluate(model, output, prediction)
   
-  # 6) Exibição do gráfico com os resultados
+  # Plotting result in a jpg file
   yvalues <- c(io_train$output, io_test$output)
   Date <- as.Date(TS_ORIGINAL$Data)
   Date <- tail(Date, n=length(yvalues))
   save_image(yvalues = yvalues, adjust=adjust, prediction=prediction, 
              date = Date, state = estado, title = titulo, product = etanol)
-  #grafico <- plot_ts_pred(x = Data, y=yvalues, yadj=adjust, ypre=prediction, color_adjust = "blue", color_prediction = "red") +
-  #  theme(text = element_text(size=18)) +
-  #  labs(title = paste0(titulo, " - Etanol ", etanol, " - ", estado, " Teste em ", max(year(Data))))
-  #plot(grafico)
-  
-  #Cálculo do R2
+
+  # Calculating Training and Testing R2 metrics
   R2_Treino <- 1 - sum((as.vector(io_train$output) - adjust)^2) / sum((as.vector(io_train$output) - mean(as.vector(io_train$output)))^2)
   print(paste("R2_Treino=", R2_Treino))
   
   df  <- data.frame(real = as.vector(io_test$output), previsto = prediction)
-  df$ape <- abs((df$real - df$previsto)/df$real)
+  # EXCLUIR A LINHA ABAIXO!
+  #df$ape <- abs((df$real - df$previsto)/df$real)
   
   R2_Teste <- 1 - (sum(abs(df$real-df$previsto)^2) / sum((df$real - mean(df$real))^2))
   
@@ -174,10 +195,10 @@ F_TSReg <- function(df, estado, etanol, meses_teste, sw_par, input_size, base_mo
   
   print(df)
   
+  # Printing training end date and time
   print(paste("Final do treinamento:", format(Sys.time(), format = "%B %d, %Y %H:%M:%S")))
   
-  # 7) Retorno do modelo treinado e ajustado
-  
+  # Assembling the function output's dataset
   saida <- data.frame(Estado = estado, Produto = etanol, Ano_Teste = max(year(Date)), Modelo = titulo, preprocess = class(model$preprocess)[1],
                       R2_Treino= R2_Treino, R2_Teste = R2_Teste, 
                       best_sw = best_sw,

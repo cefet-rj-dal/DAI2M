@@ -71,7 +71,7 @@ filename <- sprintf("results/results_%s.RDS", scenario)
 saveRDS(results_PRE_MLM, filename)
 
 # --------------------------------------------------------------------------------------------------------------------------- #
-# 1) STATE:SP | PRODUCT: ANHYDROUS ETHANOL
+# 2) STATE:SP | PRODUCT: ANHYDROUS ETHANOL
 state = "SP"
 product = "anhydrous"
 
