@@ -19,7 +19,6 @@ dataset <- read.csv2("data/Etanol_df.csv")
 meses_teste = 12
 remove_anos_finais = 0
 AnoTesteInicial = (max(year(as.Date(dataset$Data))))
-TiposDeEtanol <- c("hidratado", "anidro")
 sw_par=seq(9, 18, 3)
 input_size = c(1:10)
 
@@ -66,17 +65,28 @@ product = "hydrous"
 scenario = paste0(state, "_", product)
 create_directories(scenario)
 
-# Retrieval of results from previous training/test steps
-results_PRE_MLM <- data.frame()
-
 # Evaluation of PRE+MLM models
 results_PRE_MLM <- F_PRE_MLM(Estado = state, TiposDeEtanol = product, AnoTesteInicial=AnoTesteInicial, 
-                       PRE_MLM=PRE_MLM, resultado=results_PRE_MLM)
+                       PRE_MLM=PRE_MLM)
 
 # Saving results
-filename <- sprintf("results/%s.RDS", scenario)
+filename <- sprintf("results/results_%s.RDS", scenario)
 saveRDS(results_PRE_MLM, filename)
 
 
 # --------------------------------------------------------------------------------------------------------------------------- #
 # 1) STATE:SP | PRODUCT: ANHYDROUS ETHANOL
+state = "SP"
+product = "anhydrous"
+
+scenario = paste0(state, "_", product)
+create_directories(scenario)
+
+# Evaluation of PRE+MLM models
+results_PRE_MLM <- F_PRE_MLM(Estado = state, TiposDeEtanol = product, AnoTesteInicial=AnoTesteInicial, 
+                             PRE_MLM=PRE_MLM)
+
+# Saving results
+filename <- sprintf("results/results_%s.RDS", scenario)
+saveRDS(results_PRE_MLM, filename)
+

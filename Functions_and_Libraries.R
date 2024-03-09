@@ -196,7 +196,8 @@ F_TSReg <- function(df, estado, etanol, meses_teste, sw_par, input_size, base_mo
 }
 
 
-F_PRE_MLM <- function(Estado, TiposDeEtanol, AnoTesteInicial, PRE_MLM, resultado){
+F_PRE_MLM <- function(Estado, TiposDeEtanol, AnoTesteInicial, PRE_MLM){
+  resultado <- data.frame()
   for(Tipo in TiposDeEtanol){
     for(AnoTeste in (AnoTesteInicial-4):AnoTesteInicial){
       remove_anos_finais = max(year(dataset$Data)) - AnoTeste
