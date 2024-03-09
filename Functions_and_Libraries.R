@@ -1,4 +1,4 @@
-# 1) Bibliotecas
+# 1) Libraries
 
 library("daltoolbox")
 library("forecast")
@@ -13,8 +13,9 @@ library(reticulate)
 library(lubridate)
 
 
-# 2) Funções
+# 2) Functions
 
+#   2.1) Function for training and evaluating ARIMA reference models
 F_ARIMA <- function(df, estado, etanol, meses_teste, titulo, seed=1, remove_anos_finais=0){
   set.seed(seed)
   
@@ -99,7 +100,7 @@ F_ARIMA <- function(df, estado, etanol, meses_teste, titulo, seed=1, remove_anos
   return(saida)
 }
 
-
+#   2.2) Function for training and evaluating PRE+MLM models
 F_TSReg <- function(df, estado, etanol, meses_teste, sw_par, input_size, base_model, ranges, titulo, seed=1, remove_anos_finais=0){
   set.seed(seed)
   # Printing training start date and time
@@ -216,7 +217,8 @@ F_TSReg <- function(df, estado, etanol, meses_teste, sw_par, input_size, base_mo
   return(saida)
 }
 
-
+#   2.3) Function for training and evaluating all PRE+MLM models in a given scenario. This funcion uses the 
+#        Rolling Forecast Origin strategy
 F_PRE_MLM <- function(Estado, TiposDeEtanol, AnoTesteInicial, PRE_MLM){
   resultado <- data.frame()
   for(Tipo in TiposDeEtanol){
@@ -245,7 +247,7 @@ F_PRE_MLM <- function(Estado, TiposDeEtanol, AnoTesteInicial, PRE_MLM){
   return(saida)
 }
 
-
+#   2.4) Function for creating directories
 create_directories <- function(state) {
   #dir_name <- sprintf("%s/%s", "hyper", state)
   #if (!file.exists(dir_name))
@@ -258,7 +260,7 @@ create_directories <- function(state) {
     dir.create(dir_name, recursive = TRUE)
 }
 
-
+#   2.5) Function to save model graph results to jpg files
 save_image <- function(yvalues, adjust, prediction, date, state, title, product) {
   # 1. Filename
   scenario = paste0(state, "_", product)
@@ -272,3 +274,30 @@ save_image <- function(yvalues, adjust, prediction, date, state, title, product)
   # 3. Close the file
   dev.off()
 }
+
+
+#   2.6) Function to integrate all .RDS results files into a single .csv file
+integrateAndSaveRDSFiles <- function(subdir, outputCSVFile) {
+  # Listar todos os arquivos .RDS no subdiretório
+  rdsFiles <- list.files(path = subdir, pattern = "\\.RDS$", full.names = TRUE)
+  
+  # Inicializar um dataframe vazio para armazenar os dados combinados
+  combinedDF <- NULL
+  
+  # Ler cada arquivo .RDS e combiná-los
+  for (file in rdsFiles) {
+    tempDF <- readRDS(file)
+    if(is.null(combinedDF)) {
+      combinedDF <- tempDF
+    } else {
+      combinedDF <- rbind(combinedDF, tempDF)
+    }
+  }
+  
+  # Salvar o dataframe combinado em um arquivo .csv
+  write.csv(combinedDF, file = outputCSVFile, row.names = FALSE)
+}
+
+# Usar a função
+# Substitua 'subdiretorio' pelo caminho do seu subdiretório e 'saida.csv' pelo nome desejado para o arquivo de saída
+integrateAndSaveRDSFiles("subdiretorio", "saida.csv")
