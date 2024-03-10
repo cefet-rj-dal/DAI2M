@@ -63,7 +63,7 @@ scenario = paste0(state, "_", product)
 create_directories(scenario)
 
 # Evaluation of PRE+MLM models
-results_PRE_MLM <- F_PRE_MLM(Estado = state, TiposDeEtanol = product, AnoTesteInicial=AnoTesteInicial, 
+results_PRE_MLM <- F_PRE_MLM_RO(Estado = state, TiposDeEtanol = product, AnoTesteInicial=AnoTesteInicial, 
                        PRE_MLM=PRE_MLM)
 
 # Saving results
@@ -79,9 +79,14 @@ scenario = paste0(state, "_", product)
 create_directories(scenario)
 
 # Evaluation of PRE+MLM models
-results_PRE_MLM <- F_PRE_MLM(Estado = state, TiposDeEtanol = product, AnoTesteInicial=AnoTesteInicial, 
+results_PRE_MLM <- F_PRE_MLM_RO(Estado = state, TiposDeEtanol = product, AnoTesteInicial=AnoTesteInicial, 
                              PRE_MLM=PRE_MLM)
 
 # Saving results
 filename <- sprintf("results/results_%s.RDS", scenario)
 saveRDS(results_PRE_MLM, filename)
+
+# --------------------------------------------------------------------------------------------------------------------------- #
+# 2) STATE:GO | PRODUCT: HYDROUS ETHANOL
+F_PRE_MLM_RO(state = "GO", product = "hydrous", AnoTesteInicial=AnoTesteInicial, PRE_MLM=PRE_MLM)
+

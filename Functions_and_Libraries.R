@@ -17,6 +17,8 @@ library(lubridate)
 ###################################################################################################################################
 # 2) FUNCTIONS ------------------------------------------------------------------------------------------------------------------ #
 ###################################################################################################################################
+
+# ------------------------------------------------------------------------------------------------------------------------------- #
 #   2.1) Function for training and evaluating ARIMA reference models
 F_ARIMA <- function(df, estado, etanol, meses_teste, titulo, seed=1, remove_anos_finais=0){
   set.seed(seed)
@@ -102,6 +104,7 @@ F_ARIMA <- function(df, estado, etanol, meses_teste, titulo, seed=1, remove_anos
   return(saida)
 }
 
+# ------------------------------------------------------------------------------------------------------------------------------- #
 #   2.2) Function for training and evaluating PRE+MLM models
 F_TSReg <- function(df, estado, etanol, meses_teste, sw_par, input_size, base_model, ranges, titulo, seed=1, remove_anos_finais=0){
   set.seed(seed)
@@ -203,7 +206,7 @@ F_TSReg <- function(df, estado, etanol, meses_teste, sw_par, input_size, base_mo
   
   # Assembling the function output's dataset
   saida <- data.frame(Estado = estado, Produto = etanol, Ano_Teste = max(year(Date)), Modelo = titulo, preprocess = class(model$preprocess)[1],
-                      R2_Treino= R2_Treino, R2_Teste = R2_Teste, 
+                      R2_Treino= R2_Treino, R2_Teste = R2_Teste, Ordem = NA,
                       best_sw = best_sw,
                       input_size = model$input_size, 
                       nhid = if(!is.null(model$nhid)){model$nhid} else {NA},
@@ -219,19 +222,22 @@ F_TSReg <- function(df, estado, etanol, meses_teste, sw_par, input_size, base_mo
   return(saida)
 }
 
-#   2.3) Function for training and evaluating all PRE+MLM models in a given scenario. This funcion uses the 
+# ------------------------------------------------------------------------------------------------------------------------------- #
+#   2.3) Function for training and evaluating all PRE+MLM models in a given scenario. This function uses the 
 #        Rolling Forecast Origin strategy
-F_PRE_MLM <- function(Estado, TiposDeEtanol, AnoTesteInicial, PRE_MLM){
+F_PRE_MLM_RO <- function(state, product, AnoTesteInicial, PRE_MLM){
   resultado <- data.frame()
-  for(Tipo in TiposDeEtanol){
-    for(AnoTeste in (AnoTesteInicial-4):AnoTesteInicial){
-      remove_anos_finais = max(year(dataset$Data)) - AnoTeste
-      nome_modelo = 1
-      for (modelo in PRE_MLM){
-        TipoMLM = names(PRE_MLM)[nome_modelo]
-        print("=================================================================================")
-        print(paste0(TipoMLM, " - Etanol ", Tipo, " - ", Estado, " - Teste em ", AnoTeste))
-        modelo_avaliado <- F_TSReg(df = dataset, estado=Estado, etanol=Tipo,
+  scenario = paste0(state, "_", product)
+  create_directories(scenario)
+
+  for(AnoTeste in (AnoTesteInicial-4):AnoTesteInicial){
+    remove_anos_finais = max(year(dataset$Data)) - AnoTeste
+    nome_modelo = 1
+    for (modelo in PRE_MLM){
+      TipoMLM = names(PRE_MLM)[nome_modelo]
+      print("=================================================================================")
+      print(paste0(TipoMLM, " - Etanol ", product, " - ", state, " - Teste em ", AnoTeste))
+      modelo_avaliado <- F_TSReg(df = dataset, estado=state, etanol=product,
                                    meses_teste = meses_teste, sw_par=sw_par,
                                    input_size = input_size,
                                    base_model = modelo$base_model,
@@ -239,16 +245,18 @@ F_PRE_MLM <- function(Estado, TiposDeEtanol, AnoTesteInicial, PRE_MLM){
                                    titulo = TipoMLM,
                                    seed = 1,
                                    remove_anos_finais=remove_anos_finais)
-        print(modelo_avaliado)
-        resultado <- rbind(resultado, modelo_avaliado)
-        nome_modelo = nome_modelo + 1
+      print(modelo_avaliado)
+      resultado <- rbind(resultado, modelo_avaliado)
+      nome_modelo = nome_modelo + 1
       }
     }
-  }
-  saida <- resultado
-  return(saida)
+  
+  filename <- sprintf("results/results_%s.RDS", scenario)
+  saveRDS(resultado, filename)
+  #return(resultado)
 }
 
+# ------------------------------------------------------------------------------------------------------------------------------- #
 #   2.4) Function for creating directories
 create_directories <- function(state) {
   #dir_name <- sprintf("%s/%s", "hyper", state)
@@ -262,6 +270,7 @@ create_directories <- function(state) {
     dir.create(dir_name, recursive = TRUE)
 }
 
+# ------------------------------------------------------------------------------------------------------------------------------- #
 #   2.5) Function to save model graph results to jpg files
 save_image <- function(yvalues, adjust, prediction, date, state, title, product) {
   # 1. Filename
@@ -277,7 +286,7 @@ save_image <- function(yvalues, adjust, prediction, date, state, title, product)
   dev.off()
 }
 
-
+# ------------------------------------------------------------------------------------------------------------------------------- #
 #   2.6) Function to integrate all .RDS results files into a single .csv file
 integrateAndSaveRDSFiles <- function(subdir, outputCSVFile) {
   # Listar todos os arquivos .RDS no subdiretório
