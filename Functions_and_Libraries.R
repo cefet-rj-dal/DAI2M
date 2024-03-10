@@ -288,14 +288,14 @@ save_image <- function(yvalues, adjust, prediction, date, state, title, product)
 
 # ------------------------------------------------------------------------------------------------------------------------------- #
 #   2.6) Function to integrate all .RDS results files into a single .csv file
-integrateAndSaveRDSFiles <- function(subdir, outputCSVFile) {
-  # Listar todos os arquivos .RDS no subdiretório
+integrateAndSaveResults <- function(subdir) {
+  # List all .RDS files in the results subdirectory
   rdsFiles <- list.files(path = subdir, pattern = "\\.RDS$", full.names = TRUE)
   
-  # Inicializar um dataframe vazio para armazenar os dados combinados
+  # Initialize an empty dataframe to store the combined data
   combinedDF <- NULL
   
-  # Ler cada arquivo .RDS e combiná-los
+  # Read each .RDS file and combine them
   for (file in rdsFiles) {
     tempDF <- readRDS(file)
     if(is.null(combinedDF)) {
@@ -305,10 +305,6 @@ integrateAndSaveRDSFiles <- function(subdir, outputCSVFile) {
     }
   }
   
-  # Salvar o dataframe combinado em um arquivo .csv
-  write.csv(combinedDF, file = outputCSVFile, row.names = FALSE)
+  # Save the combined dataframe to a .csv file
+  write.csv(combinedDF, file = "results/IntegratedResults.csv", row.names = FALSE)
 }
-
-# Usar a função
-# Substitua 'subdiretorio' pelo caminho do seu subdiretório e 'saida.csv' pelo nome desejado para o arquivo de saída
-integrateAndSaveRDSFiles("subdiretorio", "saida.csv")

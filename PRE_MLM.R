@@ -56,37 +56,18 @@ PRE_MLM = list(
 
 # --------------------------------------------------------------------------------------------------------------------------- #
 # 1) STATE:SP | PRODUCT: HYDROUS ETHANOL
-state = "SP"
-product = "hydrous"
-
-scenario = paste0(state, "_", product)
-create_directories(scenario)
-
-# Evaluation of PRE+MLM models
-results_PRE_MLM <- F_PRE_MLM_RO(Estado = state, TiposDeEtanol = product, AnoTesteInicial=AnoTesteInicial, 
-                       PRE_MLM=PRE_MLM)
-
-# Saving results
-filename <- sprintf("results/results_%s.RDS", scenario)
-saveRDS(results_PRE_MLM, filename)
+F_PRE_MLM_RO(state = "SP", product = "hydrous", AnoTesteInicial=AnoTesteInicial, PRE_MLM=PRE_MLM)
 
 # --------------------------------------------------------------------------------------------------------------------------- #
 # 2) STATE:SP | PRODUCT: ANHYDROUS ETHANOL
-state = "SP"
-product = "anhydrous"
-
-scenario = paste0(state, "_", product)
-create_directories(scenario)
-
-# Evaluation of PRE+MLM models
-results_PRE_MLM <- F_PRE_MLM_RO(Estado = state, TiposDeEtanol = product, AnoTesteInicial=AnoTesteInicial, 
-                             PRE_MLM=PRE_MLM)
-
-# Saving results
-filename <- sprintf("results/results_%s.RDS", scenario)
-saveRDS(results_PRE_MLM, filename)
+F_PRE_MLM_RO(state = "SP", product = "anhydrous", AnoTesteInicial=AnoTesteInicial, PRE_MLM=PRE_MLM)
 
 # --------------------------------------------------------------------------------------------------------------------------- #
-# 2) STATE:GO | PRODUCT: HYDROUS ETHANOL
+# 3) STATE:GO | PRODUCT: HYDROUS ETHANOL
 F_PRE_MLM_RO(state = "GO", product = "hydrous", AnoTesteInicial=AnoTesteInicial, PRE_MLM=PRE_MLM)
 
+
+###############################################################################################################################
+# --- INTEGRATE SCENARIO RESULTS INTO A .CSV FILE---------------------------------------------------------------------------- #
+###############################################################################################################################
+integrateAndSaveResults("results")
