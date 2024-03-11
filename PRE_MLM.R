@@ -72,19 +72,3 @@ F_PRE_MLM_RO(state = "GO", product = "hydrous", AnoTesteInicial=AnoTesteInicial,
 ###############################################################################################################################
 integrateAndSaveResults("results")
 
-
-# CORREÇÃO PARA OS DATASETS DE RESULTADOS DE SP-HIDRATADO E SP-ANIDRO
-
-#results_SP_anhydrous[["Ordem"]] <- NA
-#results_SP_hydrous[["Ordem"]] <- NA
-
-#colnames <- colnames(results_SP_anhydrous)
-#nova_ordem <- c("Estado", "Produto", "Ano_Teste", "Modelo", "preprocess", "R2_Treino", "R2_Teste", "Ordem",
-#                "best_sw", "input_size", "nhid", "actfun", "kernel", "epsilon", "cost", "size", "decay",
-#                "maxit", "epochs" )
-
-#results_SP_anhydrous <- results_SP_anhydrous[, nova_ordem]
-#results_SP_hydrous <- results_SP_hydrous[, nova_ordem]
-
-#saveRDS(results_SP_anhydrous, "results/results_SP_anhydrous.RDS")
-#saveRDS(results_SP_hydrous, "results/results_SP_hydrous.RDS")
