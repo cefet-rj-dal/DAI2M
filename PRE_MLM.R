@@ -13,8 +13,7 @@ dataset <- read.csv2("data/Etanol_df.csv")
 ###############################################################################################################################
 # --- PARAMETERS ------------------------------------------------------------------------------------------------------------ #
 ###############################################################################################################################
-# a) General Params 
-meses_teste = 12
+# a) General parameters
 remove_anos_finais = 0
 AnoTesteInicial = (max(year(as.Date(dataset$Data))))
 sw_par=seq(9, 18, 3)
@@ -66,6 +65,9 @@ F_PRE_MLM_RO(state = "SP", product = "anhydrous", AnoTesteInicial=AnoTesteInicia
 # 3) STATE:GO | PRODUCT: HYDROUS ETHANOL
 F_PRE_MLM_RO(state = "GO", product = "hydrous", AnoTesteInicial=AnoTesteInicial, PRE_MLM=PRE_MLM)
 
+# --------------------------------------------------------------------------------------------------------------------------- #
+# 4) STATE:GO | PRODUCT: HYDROUS ETHANOL
+F_PRE_MLM_RO(state = "GO", product = "anhydrous", AnoTesteInicial=AnoTesteInicial, PRE_MLM=PRE_MLM)
 
 ###############################################################################################################################
 # --- INTEGRATE SCENARIO RESULTS INTO A .CSV FILE---------------------------------------------------------------------------- #
