@@ -60,14 +60,6 @@ F_ARIMA <- function(df, estado, etanol, meses_teste, titulo, seed=1, remove_anos
   prediction <- predict(model, x=io_test$input, steps_ahead=steps_ahead)
   prediction <- as.vector(prediction)
   
-  # TESTAR SE O TRECHO COMENTADO ABAIXO PODE SER EXCLUÍDO ######################################
-  #output <- as.vector(io_test$output)
-  #if (steps_ahead > 1)
-  #  output <- output[1:steps_ahead]
-  
-  #Evaluation of test data
-  #ev_test <- evaluate(model, output, prediction)
-  
   # Plotting result in a jpg file
   yvalues <- c(io_train$output, io_test$output)
   Date <- as.Date(TS_ORIGINAL$Data)
@@ -192,9 +184,7 @@ F_TSReg <- function(df, estado, etanol, meses_teste, sw_par, input_size, base_mo
   print(paste("R2_Treino=", R2_Treino))
   
   df  <- data.frame(real = as.vector(io_test$output), previsto = prediction)
-  # EXCLUIR A LINHA ABAIXO!
-  #df$ape <- abs((df$real - df$previsto)/df$real)
-  
+
   R2_Teste <- 1 - (sum(abs(df$real-df$previsto)^2) / sum((df$real - mean(df$real))^2))
   
   print(paste("R2_Teste =", R2_Teste))
@@ -238,7 +228,7 @@ F_PRE_MLM_RO <- function(state, product, AnoTesteInicial, PRE_MLM){
       print("=================================================================================")
       print(paste0(TipoMLM, " - Etanol ", product, " - ", state, " - Teste em ", AnoTeste))
       modelo_avaliado <- F_TSReg(df = dataset, estado=state, etanol=product,
-                                   meses_teste = meses_teste, sw_par=sw_par,
+                                   meses_teste = 12, sw_par=sw_par,
                                    input_size = input_size,
                                    base_model = modelo$base_model,
                                    ranges = modelo$ranges,
