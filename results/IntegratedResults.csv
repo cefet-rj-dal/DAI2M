@@ -354,7 +354,7 @@
 "MG","hydrous",2023,"diff_svm","ts_norm_diff",0.965509800032537,0.864409553916962,NA,15,10,NA,NA,"radial",0.35,3,NA,NA,NA,NA
 "MG","hydrous",2023,"diff_mlp","ts_norm_diff",0.956655941705576,0.6509093343497,NA,18,9,NA,NA,NA,NA,NA,2,0,700,NA
 "MG","hydrous",2023,"diff_conv1d","ts_norm_diff",0.997096230049972,0.679081805028175,NA,15,10,NA,NA,NA,NA,NA,NA,NA,NA,700
-"MG","hydrous",2023,"gmm_lstm","ts_norm_gminmax",NA,NA,NA,9,9,NA,NA,NA,NA,NA,NA,NA,NA,700
+"MG","hydrous",2023,"gmm_lstm","ts_norm_gminmax",0.927608428049699,0.6129238726444,NA,9,9,NA,NA,NA,NA,NA,NA,NA,NA,700
 "MG","hydrous",2023,"gmm_elm","ts_norm_gminmax",0.942124886247768,0.667604827397419,NA,12,6,19,"sig",NA,NA,NA,NA,NA,NA,NA
 "MG","hydrous",2023,"gmm_svm","ts_norm_gminmax",0.968443885598837,0.528649066644824,NA,12,7,NA,NA,"radial",0.1,8,NA,NA,NA,NA
 "MG","hydrous",2023,"gmm_mlp","ts_norm_gminmax",0.967046720939854,0.517861235244821,NA,15,10,NA,NA,NA,NA,NA,2,0,700,NA

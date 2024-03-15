@@ -53,19 +53,19 @@ PRE_MLM = list(
 # --- ADJUST ---------------------------------------------------------------------------------------------------------------- #
 ###############################################################################################################################
 
-modelo_avaliado <- F_TSReg(df = dataset, estado="GO", etanol="anhydrous",
+modelo_avaliado <- F_TSReg(df = dataset, estado="MG", etanol="hydrous",
                            meses_teste = 12, sw_par=sw_par,
                            input_size = input_size,
-                           base_model = PRE_MLM$diff_lstm$base_model,
-                           ranges = PRE_MLM$diff_lstm$ranges,
-                           titulo = "diff_lstm",
+                           base_model = PRE_MLM$gmm_lstm$base_model,
+                           ranges = PRE_MLM$gmm_lstm$ranges,
+                           titulo = "gmm_lstm",
                            seed = 1,
                            remove_anos_finais=remove_anos_finais)
 print(modelo_avaliado)
 
 # Corrigindo o valor de R2_Treino
-results_GO_anhydrous[66, 6] <- 0.837945379304704
+results_MG_hydrous[71, 6] <- 0.927608428049699
 # Corrigindo o valor de R2_Teste
-results_GO_anhydrous[66, 7] <- 0.814960527623289
+results_MG_hydrous[71, 7] <- 0.6129238726444
 # Salvando o dataframe corrigido em arquivo .RDS
-saveRDS(results_GO_anhydrous, "results/results_GO_anhydrous.RDS")
+saveRDS(results_MG_hydrous, "results/results_MG_hydrous.RDS")
