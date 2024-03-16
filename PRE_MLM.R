@@ -79,7 +79,7 @@ F_PRE_MLM_RO(state = "MG", product = "hydrous", AnoTesteInicial=AnoTesteInicial,
 F_PRE_MLM_RO(state = "MG", product = "anhydrous", AnoTesteInicial=AnoTesteInicial, PRE_MLM=PRE_MLM)
 
 # --------------------------------------------------------------------------------------------------------------------------- #
-# 7) STATE:MG | PRODUCT: ANHYDROUS ETHANOL
+# 7) STATE:MT | PRODUCT: HYDROUS ETHANOL
 F_PRE_MLM_RO(state = "MT", product = "hydrous", AnoTesteInicial=AnoTesteInicial, PRE_MLM=PRE_MLM)
 
 
