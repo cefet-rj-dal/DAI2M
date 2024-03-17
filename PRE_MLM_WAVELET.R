@@ -39,7 +39,17 @@ PRE_MLM = list(
 # 1) STATE:SP | PRODUCT: HYDROUS ETHANOL
 F_PRE_MLM_RO(state = "SP", product = "hydrous", AnoTesteInicial=AnoTesteInicial, PRE_MLM=PRE_MLM, wavelet=TRUE)
 
+# --------------------------------------------------------------------------------------------------------------------------- #
+# 2) STATE:SP | PRODUCT: ANHYDROUS ETHANOL
+F_PRE_MLM_RO(state = "SP", product = "anhydrous", AnoTesteInicial=AnoTesteInicial, PRE_MLM=PRE_MLM, wavelet=TRUE)
 
+# --------------------------------------------------------------------------------------------------------------------------- #
+# 3) STATE:GO | PRODUCT: HYDROUS ETHANOL
+F_PRE_MLM_RO(state = "GO", product = "hydrous", AnoTesteInicial=AnoTesteInicial, PRE_MLM=PRE_MLM, wavelet=TRUE)
+
+# --------------------------------------------------------------------------------------------------------------------------- #
+# 2) STATE:GO | PRODUCT: ANHYDROUS ETHANOL
+F_PRE_MLM_RO(state = "GO", product = "anhydrous", AnoTesteInicial=AnoTesteInicial, PRE_MLM=PRE_MLM, wavelet=TRUE)
 
 
 ###############################################################################################################################
