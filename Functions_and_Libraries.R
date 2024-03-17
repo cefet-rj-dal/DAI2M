@@ -12,6 +12,8 @@ library(zoo)
 library(corrplot)
 library(reticulate)
 library(lubridate)
+#library(TSPred) # To use Wavelet library
+
 
 
 ###################################################################################################################################
@@ -98,7 +100,8 @@ F_ARIMA <- function(df, estado, etanol, meses_teste, titulo, seed=1, remove_anos
 
 # ------------------------------------------------------------------------------------------------------------------------------- #
 #   2.2) Function for training and evaluating PRE+MLM models
-F_TSReg <- function(df, estado, etanol, meses_teste, sw_par, input_size, base_model, ranges, titulo, seed=1, remove_anos_finais=0){
+F_TSReg <- function(df, estado, etanol, meses_teste, sw_par, input_size, base_model, ranges, titulo, seed=1, remove_anos_finais=0,
+                    wavelet=FALSE){
   set.seed(seed)
   # Printing training start date and time
   print(paste("Início do treinamento:", format(Sys.time(), format = "%B %d, %Y %H:%M:%S")))
@@ -116,6 +119,16 @@ F_TSReg <- function(df, estado, etanol, meses_teste, sw_par, input_size, base_mo
   }else if(etanol=="anhydrous"){
     x <- TS_ORIGINAL$PROD_ETANOL_ANIDRO
   }else{print("PRODUCT NOT SPECIFIED CORRECTLY")}
+  
+  # Perform pre-processing based on the inverse Wavelet transformation.
+  if(wavelet==TRUE){
+    # Applies Wavelet preprocessing only to the portion of the data to be used in model training
+    x_Wavelet <- head(x, n = length(x) - meses_teste)
+    # Executes the wavelet transform function
+    wavelet_data <- F_WAVELET(x_Wavelet)
+    # Subwrites the preprocessed values in the variable "x".
+    x[1:(length(x) - meses_teste)] <- wavelet_data
+  }
   
   # Model adjustment, including optimization of the sliding window hyperparameter
   best_R2  <-  0
@@ -215,9 +228,13 @@ F_TSReg <- function(df, estado, etanol, meses_teste, sw_par, input_size, base_mo
 # ------------------------------------------------------------------------------------------------------------------------------- #
 #   2.3) Function for training and evaluating all PRE+MLM models in a given scenario. This function uses the 
 #        Rolling Forecast Origin strategy
-F_PRE_MLM_RO <- function(state, product, AnoTesteInicial, PRE_MLM){
+F_PRE_MLM_RO <- function(state, product, AnoTesteInicial, PRE_MLM, wavelet=FALSE){
   resultado <- data.frame()
-  scenario = paste0(state, "_", product)
+  if(wavelet==FALSE){
+    scenario = paste0(state, "_", product)
+  } else {
+    scenario = paste0(state, "_", product, "_wavelet")
+  }
   create_directories(scenario)
 
   for(AnoTeste in (AnoTesteInicial-4):AnoTesteInicial){
@@ -234,7 +251,8 @@ F_PRE_MLM_RO <- function(state, product, AnoTesteInicial, PRE_MLM){
                                    ranges = modelo$ranges,
                                    titulo = TipoMLM,
                                    seed = 1,
-                                   remove_anos_finais=remove_anos_finais)
+                                   remove_anos_finais=remove_anos_finais,
+                                   wavelet=wavelet)
       print(modelo_avaliado)
       resultado <- rbind(resultado, modelo_avaliado)
       nome_modelo = nome_modelo + 1
@@ -297,4 +315,33 @@ integrateAndSaveResults <- function(subdir) {
   
   # Save the combined dataframe to a .csv file
   write.csv(combinedDF, file = "results/IntegratedResults.csv", row.names = FALSE)
+}
+
+
+# ------------------------------------------------------------------------------------------------------------------------------- #
+#   2.7) Function to performa Wavelet preprocessing
+F_WAVELET <- function(data, filter="haar"){
+  # Performing the Discrete Wavelet Transform
+  wt <- TSPred::WaveletT(data, filter=filter) # Opções de filtro: "haar", "d4", "la8", "bl14", "c6"
+  
+  # Replace the wavelet trend components with values equal to zero
+  wt_ct <- attr(wt,"wt_obj")
+  n <- length(wt_ct@V)
+  for (i in 1:length(wt_ct@W)) {
+    wt_ct@W[[i]] <- as.matrix(rep(0, length(wt_ct@W[[i]])), ncol=1)
+  }
+  
+  # Performs the inverse wavelet transform, considering the wavelet trend components being equal to zero
+  yhat <- TSPred::WaveletT.rev(pred=NULL, wt_ct)
+  
+  # Original data vs. inverse wavelet-based data comparison
+  plot(data, type="l", col="blue")
+  lines(yhat, col="red")
+  legend("topleft",
+         legend=c("Original data", "Preprocessed data"),
+         col=c("blue", "red"),
+         lty=1,
+         cex=0.8
+  )
+  return(yhat)
 }
