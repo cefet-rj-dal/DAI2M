@@ -1,6 +1,6 @@
-###################################################################################################################################
-# 1) LIBRARIES ------------------------------------------------------------------------------------------------------------------ #
-###################################################################################################################################
+##############################################################################################################################
+# 1) LIBRARIES ------------------------------------------------------------------------------------------------------------- #
+##############################################################################################################################
 library("daltoolbox")
 library("forecast")
 library("nnet")
@@ -16,11 +16,11 @@ library(lubridate)
 
 
 
-###################################################################################################################################
-# 2) FUNCTIONS ------------------------------------------------------------------------------------------------------------------ #
-###################################################################################################################################
+##############################################################################################################################
+# 2) FUNCTIONS ------------------------------------------------------------------------------------------------------------- #
+##############################################################################################################################
 
-# ------------------------------------------------------------------------------------------------------------------------------- #
+# -------------------------------------------------------------------------------------------------------------------------- #
 #   2.1) Function for training and evaluating ARIMA reference models
 F_ARIMA <- function(df, estado, etanol, meses_teste, titulo, seed=1, remove_anos_finais=0){
   set.seed(seed)
@@ -98,10 +98,11 @@ F_ARIMA <- function(df, estado, etanol, meses_teste, titulo, seed=1, remove_anos
   return(saida)
 }
 
-# ------------------------------------------------------------------------------------------------------------------------------- #
+# -------------------------------------------------------------------------------------------------------------------------- #
 #   2.2) Function for training and evaluating PRE+MLM models
-F_TSReg <- function(df, estado, etanol, meses_teste, sw_par, input_size, base_model, ranges, titulo, seed=1, remove_anos_finais=0,
-                    wavelet=FALSE){
+F_TSReg <- function(df, estado, etanol, meses_teste, sw_par, input_size, base_model, ranges, titulo, seed=1, 
+                    remove_anos_finais=0,
+                    wavelet=FALSE, wavelet_filter){
   set.seed(seed)
   # Printing training start date and time
   print(paste("Início do treinamento:", format(Sys.time(), format = "%B %d, %Y %H:%M:%S")))
@@ -225,16 +226,12 @@ F_TSReg <- function(df, estado, etanol, meses_teste, sw_par, input_size, base_mo
   return(saida)
 }
 
-# ------------------------------------------------------------------------------------------------------------------------------- #
+# -------------------------------------------------------------------------------------------------------------------------- #
 #   2.3) Function for training and evaluating all PRE+MLM models in a given scenario. This function uses the 
 #        Rolling Forecast Origin strategy
-F_PRE_MLM_RO <- function(state, product, AnoTesteInicial, PRE_MLM, wavelet=FALSE){
+F_PRE_MLM_RO <- function(state, product, AnoTesteInicial, PRE_MLM, wavelet=FALSE, wavelet_filter="haar"){
   resultado <- data.frame()
-  if(wavelet==FALSE){
-    scenario = paste0(state, "_", product)
-  } else {
-    scenario = paste0(state, "_", product, "_wavelet")
-  }
+  scenario = paste0(state, "_", product)
   create_directories(scenario)
 
   for(AnoTeste in (AnoTesteInicial-4):AnoTesteInicial){
@@ -264,13 +261,13 @@ F_PRE_MLM_RO <- function(state, product, AnoTesteInicial, PRE_MLM, wavelet=FALSE
   #return(resultado)
 }
 
-# ------------------------------------------------------------------------------------------------------------------------------- #
+# -------------------------------------------------------------------------------------------------------------------------- #
 #   2.4) Function for creating directories
-create_directories <- function(state) {
-  #dir_name <- sprintf("%s/%s", "hyper", state)
+create_directories <- function(scenario) {
+  #dir_name <- sprintf("%s/%s", "hyper", scenario)
   #if (!file.exists(dir_name))
   #  dir.create(dir_name, recursive = TRUE)
-  dir_name <- sprintf("%s/%s", "graphics", state)
+  dir_name <- sprintf("%s/%s", "graphics", scenario)
   if (!file.exists(dir_name))
     dir.create(dir_name, recursive = TRUE)
   dir_name <- sprintf("%s", "results")
@@ -278,7 +275,7 @@ create_directories <- function(state) {
     dir.create(dir_name, recursive = TRUE)
 }
 
-# ------------------------------------------------------------------------------------------------------------------------------- #
+# -------------------------------------------------------------------------------------------------------------------------- #
 #   2.5) Function to save model graph results to jpg files
 save_image <- function(yvalues, adjust, prediction, date, state, title, product) {
   # 1. Filename
@@ -294,7 +291,7 @@ save_image <- function(yvalues, adjust, prediction, date, state, title, product)
   dev.off()
 }
 
-# ------------------------------------------------------------------------------------------------------------------------------- #
+# -------------------------------------------------------------------------------------------------------------------------- #
 #   2.6) Function to integrate all .RDS results files into a single .csv file
 integrateAndSaveResults <- function(subdir) {
   # List all .RDS files in the results subdirectory
@@ -318,30 +315,53 @@ integrateAndSaveResults <- function(subdir) {
 }
 
 
-# ------------------------------------------------------------------------------------------------------------------------------- #
-#   2.7) Function to performa Wavelet preprocessing
-F_WAVELET <- function(data, filter="haar"){
-  # Performing the Discrete Wavelet Transform
-  wt <- TSPred::WaveletT(data, filter=filter) # Opções de filtro: "haar", "d4", "la8", "bl14", "c6"
+# -------------------------------------------------------------------------------------------------------------------------- #
+#   2.7) Function to performa Wavelet preprocessing (Wavelet transform smoothing)
+F_WAVELET <- function(data, scenario = ""){
+  # Selecting the best filter
+  Best_R2_Test = -1000
+  for(filter in c("haar", "d4", "la8", "bl14", "c6")){
+    # Performing the Discrete Wavelet Transform
+    wt <- TSPred::WaveletT(data, filter=filter)
+    
+    # Replace the wavelet trend components with values equal to zero
+    wt_ct <- attr(wt,"wt_obj")
+    n <- length(wt_ct@V)
+    for (i in 1:length(wt_ct@W)) {
+      wt_ct@W[[i]] <- as.matrix(rep(0, length(wt_ct@W[[i]])), ncol=1)
+    }
+    
+    # Performs the inverse wavelet transform, considering the wavelet trend components being equal to zero
+    yhat <- TSPred::WaveletT.rev(pred=NULL, wt_ct)
+    
+    #R2_Test calculation
+    R2_Test <- 1 - (sum(abs(data-yhat)^2) / sum((data - mean(data))^2))
+    if(R2_Test>Best_R2_Test){
+      Best_R2_Test <- R2_Test
+      Best_filter <- filter
+    }
+  }
   
-  # Replace the wavelet trend components with values equal to zero
+  # Using the best filter
+  wt <- TSPred::WaveletT(data, filter=Best_filter)
+  
   wt_ct <- attr(wt,"wt_obj")
   n <- length(wt_ct@V)
   for (i in 1:length(wt_ct@W)) {
     wt_ct@W[[i]] <- as.matrix(rep(0, length(wt_ct@W[[i]])), ncol=1)
   }
   
-  # Performs the inverse wavelet transform, considering the wavelet trend components being equal to zero
   yhat <- TSPred::WaveletT.rev(pred=NULL, wt_ct)
   
   # Original data vs. inverse wavelet-based data comparison
-  plot(data, type="l", col="blue")
+  plot(data, type="l", col="blue",
+  main = paste0(scenario, " | R2=", round(Best_R2_Test, digits=3), " | Filter=", Best_filter))
   lines(yhat, col="red")
   legend("topleft",
          legend=c("Original data", "Preprocessed data"),
          col=c("blue", "red"),
          lty=1,
-         cex=0.8
-  )
+         cex=0.8)
+  
   return(yhat)
 }
