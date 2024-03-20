@@ -229,7 +229,7 @@ F_TSReg <- function(df, estado, etanol, meses_teste, sw_par, input_size, base_mo
 # -------------------------------------------------------------------------------------------------------------------------- #
 #   2.3) Function for training and evaluating all PRE+MLM models in a given scenario. This function uses the 
 #        Rolling Forecast Origin strategy
-F_PRE_MLM_RO <- function(state, product, AnoTesteInicial, PRE_MLM, wavelet=FALSE, wavelet_filter="haar"){
+F_PRE_MLM_RO <- function(state, product, AnoTesteInicial, PRE_MLM, wavelet=FALSE){
   resultado <- data.frame()
   scenario = paste0(state, "_", product)
   create_directories(scenario)
@@ -255,8 +255,12 @@ F_PRE_MLM_RO <- function(state, product, AnoTesteInicial, PRE_MLM, wavelet=FALSE
       nome_modelo = nome_modelo + 1
       }
     }
+  if(wavelet==TRUE){
+    filename <- sprintf("results/results_%s_wavelet.RDS", scenario)  
+  }else{
+    filename <- sprintf("results/results_%s.RDS", scenario)
+  }
   
-  filename <- sprintf("results/results_%s.RDS", scenario)
   saveRDS(resultado, filename)
   #return(resultado)
 }
