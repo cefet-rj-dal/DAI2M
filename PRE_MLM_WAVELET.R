@@ -27,7 +27,7 @@ for(state in c("SP", "GO", "MG", "MT", "MS", "PR")){
         data <- data$PROD_ETANOL_ANIDRO
       }else{print("PRODUCT NOT SPECIFIED CORRECTLY")}
       
-      F_WAVELET(data, wavelet_filter=filter, scenario=paste0(state, " | ", etanol))
+      F_WAVELET(data, scenario=paste0(state, " | ", etanol))
     }
   }
   par(mfrow = c(1, 1))
