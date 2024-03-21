@@ -322,7 +322,7 @@ integrateAndSaveResults <- function(subdir) {
 # -------------------------------------------------------------------------------------------------------------------------- #
 #   2.7) Function to performa Wavelet preprocessing (Wavelet transform smoothing)
 F_WAVELET <- function(data, scenario = ""){
-  # Selecting the best filter
+  # 1) Selecting the best filter
   Best_R2_Test = -1000
   for(filter in c("haar", "d4", "la8", "bl14", "c6")){
     # Performing the Discrete Wavelet Transform
@@ -346,7 +346,7 @@ F_WAVELET <- function(data, scenario = ""){
     }
   }
   
-  # Using the best filter
+  # 2) Using the best filter
   wt <- TSPred::WaveletT(data, filter=Best_filter)
   
   wt_ct <- attr(wt,"wt_obj")
@@ -357,7 +357,7 @@ F_WAVELET <- function(data, scenario = ""){
   
   yhat <- TSPred::WaveletT.rev(pred=NULL, wt_ct)
   
-  # Original data vs. inverse wavelet-based data comparison
+  # 3) Original data vs. inverse wavelet-based data comparison
   plot(data, type="l", col="blue",
   main = paste0(scenario, " | R2=", round(Best_R2_Test, digits=3), " | Filter=", Best_filter))
   lines(yhat, col="red")
