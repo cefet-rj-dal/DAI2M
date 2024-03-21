@@ -13,7 +13,6 @@ dataset <- read.csv2("data/Etanol_df.csv")
 ###############################################################################################################################
 # --- DEFINING THE BEST WAVELET FILTER TO EACH SCENARIO --------------------------------------------------------------------- #
 ###############################################################################################################################
-
 for(state in c("SP", "GO", "MG", "MT", "MS", "PR")){
   for(etanol in c("hydrous", "anhydrous")){
     #par(mfrow = c(3, 2))
@@ -54,21 +53,18 @@ PRE_MLM = list(
                                                                           epsilon=seq(0, 1, 1/20), cost=seq(1, 10, 1))),
   gmm_wavelet_mlp    = list(base_model = ts_mlp(ts_norm_gminmax()), ranges = list(size = 1:10, decay = seq(0, 1, 1/20), 
                                                                                   maxit=700)),
-  gmm_wavelet_conv1d = list(base_model = ts_conv1d(ts_norm_gminmax()), ranges = list(epochs=700))
-)
+  gmm_wavelet_conv1d = list(base_model = ts_conv1d(ts_norm_gminmax()), ranges = list(epochs=700)),
+  an_wavelet_lstm   = list(base_model = ts_lstm(ts_norm_an()), ranges = list(epochs=700)),
+  an_wavelet_elm    = list(base_model = ts_elm(ts_norm_an()), ranges = list(nhid = 1:20, actfun=c('sig', 'radbas', 
+                                                                                                  'tribas', 'relu', 'purelin'))),
+  an_wavelet_svm    = list(base_model = ts_svm(ts_norm_an()), ranges = list(kernel=c("radial", "poly", "linear", 
+                                                                                     "sigmoid"),
+                                                                            epsilon=seq(0, 1, 1/20), cost=seq(1, 10, 1))),
+  an_wavelet_mlp    = list(base_model = ts_mlp(ts_norm_an()), ranges = list(size = 1:10, decay = seq(0, 1, 1/20), 
+                                                                            maxit=700)),
+  an_wavelet_conv1d = list(base_model = ts_conv1d(ts_norm_an()), ranges = list(epochs=700))
+)  
 
-# Testar com normalização adaptativa
-PRE_MLM = list(
-  diff_wavelet_lstm   = list(base_model = ts_lstm(ts_norm_diff()), ranges = list(epochs=700)),
-  diff_wavelet_elm    = list(base_model = ts_elm(ts_norm_diff()), ranges = list(nhid = 1:20, actfun=c('sig', 'radbas', 
-                                                                                                      'tribas', 'relu', 'purelin'))),
-  diff_wavelet_svm    = list(base_model = ts_svm(ts_norm_diff()), ranges = list(kernel=c("radial", "poly", "linear", 
-                                                                                         "sigmoid"),
-                                                                                epsilon=seq(0, 1, 1/20), cost=seq(1, 10, 1))),
-  diff_wavelet_mlp    = list(base_model = ts_mlp(ts_norm_diff()), ranges = list(size = 1:10, decay = seq(0, 1, 1/20), 
-                                                                                maxit=700)),
-  diff_wavelet_conv1d = list(base_model = ts_conv1d(ts_norm_diff()), ranges = list(epochs=700))
-)
 
 ###############################################################################################################################
 # --- TRAINING AND TESTING SCENARIOS ---------------------------------------------------------------------------------------- #
