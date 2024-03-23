@@ -118,3 +118,27 @@ integrateAndSaveResults("results")
 
 
 
+###############################################################################################################################
+# --- INDIVIDUAL ADJUST------------------------------------------------------------------------------------------------------ #
+###############################################################################################################################
+AnoTeste = 2022
+remove_anos_finais = max(year(dataset$Data)) - AnoTeste
+TipoMLM = names(PRE_MLM)[1]
+product = "hydrous"
+state = "GO"
+base_model = PRE_MLM$gmm_wavelet_lstm$base_model
+ranges = PRE_MLM$gmm_wavelet_lstm$ranges
+
+print("=================================================================================")
+print(paste0(TipoMLM, " - Etanol ", product, " - ", state, " - Teste em ", AnoTeste))
+modelo_avaliado <- F_TSReg(df = dataset, estado=state, etanol=product,
+                           meses_teste = 12, sw_par=sw_par,
+                           input_size = input_size,
+                           base_model = base_model,
+                           ranges = ranges,
+                           titulo = TipoMLM,
+                           seed = 1,
+                           remove_anos_finais=remove_anos_finais,
+                           wavelet=TRUE)
+print(modelo_avaliado)
+
