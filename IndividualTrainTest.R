@@ -69,3 +69,28 @@ results_MG_hydrous[71, 6] <- 0.927608428049699
 results_MG_hydrous[71, 7] <- 0.6129238726444
 # Salvando o dataframe corrigido em arquivo .RDS
 saveRDS(results_MG_hydrous, "results/results_MG_hydrous.RDS")
+
+
+
+###############################################################################################################################
+# --- DEFINING THE BEST WAVELET FILTER TO EACH SCENARIO --------------------------------------------------------------------- #
+###############################################################################################################################
+for(state in c("SP", "GO", "MG", "MT", "MS", "PR")){
+  for(etanol in c("hydrous", "anhydrous")){
+    #par(mfrow = c(3, 2))
+    #for(filter in c("haar", "d4", "la8", "bl14", "c6")){
+    data <- dataset
+    data <- data[data$Estado_Sigla == state, ]
+    # Selecting the Correct Type of Ethanol and assembling the "x" vector
+    if(etanol == "hydrous"){
+      data <- data$PROD_ETANOL_HIDRATADO
+    }else if(etanol=="anhydrous"){
+      data <- data$PROD_ETANOL_ANIDRO
+    }else{print("PRODUCT NOT SPECIFIED CORRECTLY")}
+    
+    F_WAVELET(data, scenario=paste0(state, " | ", etanol))
+    #}
+  }
+  par(mfrow = c(1, 1))
+}
+par(mfrow = c(1, 1))
