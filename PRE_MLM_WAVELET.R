@@ -87,10 +87,31 @@ F_PRE_MLM_RO(state = "MT", product = "anhydrous", AnoTesteInicial=AnoTesteInicia
              wavelet=TRUE)
 
 
+# --------------------------------------------------------------------------------------------------------------------------- #
+# 9) STATE:MS | PRODUCT: HYDROUS ETHANOL
+F_PRE_MLM_RO(state = "MS", product = "hydrous", AnoTesteInicial=AnoTesteInicial, PRE_MLM=PRE_MLM, 
+             wavelet=TRUE)
+
+# --------------------------------------------------------------------------------------------------------------------------- #
+# 10) STATE:MS | PRODUCT: ANHYDROUS ETHANOL
+F_PRE_MLM_RO(state = "MS", product = "anhydrous", AnoTesteInicial=AnoTesteInicial, PRE_MLM=PRE_MLM, 
+             wavelet=TRUE)
+
+# --------------------------------------------------------------------------------------------------------------------------- #
+# 11) STATE:PR | PRODUCT: HYDROUS ETHANOL
+F_PRE_MLM_RO(state = "PR", product = "hydrous", AnoTesteInicial=AnoTesteInicial, PRE_MLM=PRE_MLM, 
+             wavelet=TRUE)
+
+# --------------------------------------------------------------------------------------------------------------------------- #
+# 12) STATE:PR | PRODUCT: ANHYDROUS ETHANOL
+F_PRE_MLM_RO(state = "PR", product = "anhydrous", AnoTesteInicial=AnoTesteInicial, PRE_MLM=PRE_MLM, 
+             wavelet=TRUE)
+
 ###############################################################################################################################
 # --- INTEGRATE SCENARIO RESULTS INTO A .CSV FILE---------------------------------------------------------------------------- #
 ###############################################################################################################################
 integrateAndSaveResults("results")
+
 
 
 
