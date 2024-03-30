@@ -87,12 +87,21 @@ F_PRE_MLM_RO(state = "MT", product = "hydrous", AnoTesteInicial=AnoTesteInicial,
 F_PRE_MLM_RO(state = "MT", product = "anhydrous", AnoTesteInicial=AnoTesteInicial, PRE_MLM=PRE_MLM)
 
 # --------------------------------------------------------------------------------------------------------------------------- #
-# 0) STATE:MS | PRODUCT: HYDROUS ETHANOL
+# 9) STATE:MS | PRODUCT: HYDROUS ETHANOL
 F_PRE_MLM_RO(state = "MS", product = "hydrous", AnoTesteInicial=AnoTesteInicial, PRE_MLM=PRE_MLM)
 
 # --------------------------------------------------------------------------------------------------------------------------- #
 # 10) STATE:MS | PRODUCT: ANHYDROUS ETHANOL
 F_PRE_MLM_RO(state = "MS", product = "anhydrous", AnoTesteInicial=AnoTesteInicial, PRE_MLM=PRE_MLM)
+
+# --------------------------------------------------------------------------------------------------------------------------- #
+# 11) STATE:PR | PRODUCT: HYDROUS ETHANOL
+F_PRE_MLM_RO(state = "PR", product = "hydrous", AnoTesteInicial=AnoTesteInicial, PRE_MLM=PRE_MLM)
+
+# --------------------------------------------------------------------------------------------------------------------------- #
+# 12) STATE:MS | PRODUCT: ANHYDROUS ETHANOL
+F_PRE_MLM_RO(state = "PR", product = "anhydrous", AnoTesteInicial=AnoTesteInicial, PRE_MLM=PRE_MLM)
+
 
 ###############################################################################################################################
 # --- INTEGRATE SCENARIO RESULTS INTO A .CSV FILE---------------------------------------------------------------------------- #
