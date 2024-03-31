@@ -256,7 +256,8 @@ F_PRE_MLM_RO <- function(state, product, AnoTesteInicial, PRE_MLM, wavelet=FALSE
       }
     }
   if(wavelet==TRUE){
-    filename <- sprintf("results/results_%s_wavelet.RDS", scenario)  
+    #filename <- sprintf("results/results_%s_wavelet.RDS", scenario)
+    filename <- sprintf("results/results_%s_wavelet_SVM.RDS", scenario) #Linha temporária
   }else{
     filename <- sprintf("results/results_%s.RDS", scenario)
   }
