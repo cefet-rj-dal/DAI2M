@@ -13,6 +13,7 @@ library(corrplot)
 library(reticulate)
 library(lubridate)
 #library(TSPred) # To use Wavelet library
+library(tspredit)
 
 
 
@@ -122,14 +123,30 @@ F_TSReg <- function(df, estado, etanol, meses_teste, sw_par, input_size, base_mo
   }else{print("PRODUCT NOT SPECIFIED CORRECTLY")}
   
   # Perform pre-processing based on the inverse Wavelet transformation.
-  if(wavelet==TRUE){
+  #if(wavelet==TRUE){
     # Applies Wavelet preprocessing only to the portion of the data to be used in model training
-    x_Wavelet <- head(x, n = length(x) - meses_teste)
+  #  x_Wavelet <- head(x, n = length(x) - meses_teste)
     # Executes the wavelet transform function
-    wavelet_data <- F_WAVELET(x_Wavelet)
+  #  wavelet_data <- F_WAVELET(x_Wavelet)
     # Subwrites the preprocessed values in the variable "x".
-    x[1:(length(x) - meses_teste)] <- wavelet_data
+  #  x[1:(length(x) - meses_teste)] <- wavelet_data
+  #}
+  
+  
+  # Perform Wavelet filter. ########## TEST ##########
+  if(wavelet==TRUE){
+    source("https://raw.githubusercontent.com/cefet-rj-dal/tspredit/main/R/ts_fil_wavelet.R")
+    # Applies Wavelet filter only to the portion of the data to be used in model training
+    x_Wavelet <- head(x, n = length(x) - meses_teste)
+    # Run Wavelet filter
+    filter <- ts_fil_wavelet()
+    filter <- fit(filter, x_Wavelet)
+    y <- transform(filter, x_Wavelet)
+    # Subwrites the preprocessed values in the variable "x".
+    plot(plot_ts_pred(y=x_Wavelet, yadj=y))
+    x[1:(length(x) - meses_teste)] <- y
   }
+  
   
   # Model adjustment, including optimization of the sliding window hyperparameter
   best_R2  <-  0
@@ -257,7 +274,7 @@ F_PRE_MLM_RO <- function(state, product, AnoTesteInicial, PRE_MLM, wavelet=FALSE
     }
   if(wavelet==TRUE){
     #filename <- sprintf("results/results_%s_wavelet.RDS", scenario)
-    filename <- sprintf("results/results_%s_wavelet_SVM.RDS", scenario) #Linha temporária
+    filename <- sprintf("results/results_%s_wavelet_filter.RDS", scenario) #Linha temporária
   }else{
     filename <- sprintf("results/results_%s.RDS", scenario)
   }
