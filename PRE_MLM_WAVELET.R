@@ -148,3 +148,4 @@ modelo_avaliado <- F_TSReg(df = dataset, estado=state, etanol=product,
                            wavelet=TRUE)
 print(modelo_avaliado)
 
+

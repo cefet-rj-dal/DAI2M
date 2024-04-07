@@ -84,7 +84,7 @@
 "GO","anhydrous",2023,"diff_wavelet_svm","ts_norm_diff",0.995387430175224,0.840406315522334,NA,9,4,NA,NA,"radial",0.1,10,NA,NA,NA,NA
 "GO","anhydrous",2023,"diff_wavelet_mlp","ts_norm_diff",0.997177329251928,0.833141481263864,NA,12,9,NA,NA,NA,NA,NA,2,0,700,NA
 "GO","anhydrous",2023,"diff_wavelet_conv1d","ts_norm_diff",0.992283183021319,0.890877836057062,NA,12,7,NA,NA,NA,NA,NA,NA,NA,NA,700
-"GO","anhydrous",2019,"gmm_wavelet_lstm","ts_norm_gminmax",NA,NA,NA,9,9,NA,NA,NA,NA,NA,NA,NA,NA,700
+"GO","anhydrous",2019,"gmm_wavelet_lstm","ts_norm_gminmax",0.939004957065232,-0.0704819347553343,NA,9,9,NA,NA,NA,NA,NA,NA,NA,NA,700
 "GO","anhydrous",2019,"gmm_wavelet_elm","ts_norm_gminmax",0.9954559949595,0.651954179991919,NA,12,10,20,"relu",NA,NA,NA,NA,NA,NA,NA
 "GO","anhydrous",2019,"gmm_wavelet_svm","ts_norm_gminmax",0.989597296885488,0.779628262224379,NA,12,10,NA,NA,"linear",0.05,10,NA,NA,NA,NA
 "GO","anhydrous",2019,"gmm_wavelet_mlp","ts_norm_gminmax",0.996908821395019,0.386067953072291,NA,15,10,NA,NA,NA,NA,NA,2,0,700,NA
@@ -989,7 +989,7 @@
 "MT","anhydrous",2019,"gmm_wavelet_svm","ts_norm_gminmax",0.993617612143957,0.572610699887236,NA,18,5,NA,NA,"linear",0.05,9,NA,NA,NA,NA
 "MT","anhydrous",2019,"gmm_wavelet_mlp","ts_norm_gminmax",0.998935009818019,-0.833355662834247,NA,15,9,NA,NA,NA,NA,NA,3,0,700,NA
 "MT","anhydrous",2019,"gmm_wavelet_conv1d","ts_norm_gminmax",0.992441324690695,0.609690772859413,NA,18,6,NA,NA,NA,NA,NA,NA,NA,NA,700
-"MT","anhydrous",2019,"an_wavelet_lstm","ts_norm_an",NA,NA,NA,9,9,NA,NA,NA,NA,NA,NA,NA,NA,700
+"MT","anhydrous",2019,"an_wavelet_lstm","ts_norm_an",0.950710977510479,0.745687287992483,NA,9,9,NA,NA,NA,NA,NA,NA,NA,NA,700
 "MT","anhydrous",2019,"an_wavelet_elm","ts_norm_an",-0.229019989486024,0.668108190224578,NA,12,9,20,"tribas",NA,NA,NA,NA,NA,NA,NA
 "MT","anhydrous",2019,"an_wavelet_svm","ts_norm_an",0.994739413579163,0.652416364867927,NA,18,10,NA,NA,"linear",0,10,NA,NA,NA,NA
 "MT","anhydrous",2019,"an_wavelet_mlp","ts_norm_an",0.999572645121677,0.643101812361841,NA,18,7,NA,NA,NA,NA,NA,8,0,700,NA
