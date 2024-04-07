@@ -139,7 +139,7 @@ F_TSReg <- function(df, estado, etanol, meses_teste, sw_par, input_size, base_mo
     # Applies Wavelet filter only to the portion of the data to be used in model training
     x_Wavelet <- head(x, n = length(x) - meses_teste)
     # Run Wavelet filter
-    filter <- ts_fil_wavelet()
+    filter <- ts_fil_wavelet(filter = c("haar", "d4", "la8", "bl14", "c6"))#ts_fil_wavelet()
     filter <- fit(filter, x_Wavelet)
     y <- transform(filter, x_Wavelet)
     # Subwrites the preprocessed values in the variable "x".
