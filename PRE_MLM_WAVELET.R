@@ -29,25 +29,25 @@ PRE_MLM = list(
                                                                                 epsilon=seq(0, 1, 1/20), cost=seq(1, 10, 1))),
   diff_wavelet_mlp    = list(base_model = ts_mlp(ts_norm_diff()), ranges = list(size = 1:10, decay = seq(0, 1, 1/20), 
                                                                                 maxit=700)),
-  diff_wavelet_conv1d = list(base_model = ts_conv1d(ts_norm_diff()), ranges = list(epochs=700))#,
-  #gmm_wavelet_lstm   = list(base_model = ts_lstm(ts_norm_gminmax()), ranges = list(epochs=700)),
-  #gmm_wavelet_elm    = list(base_model = ts_elm(ts_norm_gminmax()), ranges = list(nhid = 1:20, actfun=c('sig', 'radbas', 
-  #                                                                                              'tribas', 'relu', 'purelin'))),
-  #gmm_wavelet_svm    = list(base_model = ts_svm(ts_norm_gminmax()), ranges = list(kernel=c("radial", "poly", "linear", 
-  #                                                                                         "sigmoid"),
-  #                                                                        epsilon=seq(0, 1, 1/20), cost=seq(1, 10, 1))),
-  #gmm_wavelet_mlp    = list(base_model = ts_mlp(ts_norm_gminmax()), ranges = list(size = 1:10, decay = seq(0, 1, 1/20), 
-  #                                                                                maxit=700)),
-  #gmm_wavelet_conv1d = list(base_model = ts_conv1d(ts_norm_gminmax()), ranges = list(epochs=700)),
-  #an_wavelet_lstm   = list(base_model = ts_lstm(ts_norm_an()), ranges = list(epochs=700)),
-  #an_wavelet_elm    = list(base_model = ts_elm(ts_norm_an()), ranges = list(nhid = 1:20, actfun=c('sig', 'radbas', 
-  #                                                                                                'tribas', 'relu', 'purelin'))),
-  #an_wavelet_svm    = list(base_model = ts_svm(ts_norm_an()), ranges = list(kernel=c("radial", "poly", "linear", 
-  #                                                                                   "sigmoid"),
-  #                                                                          epsilon=seq(0, 1, 1/20), cost=seq(1, 10, 1))),
-  #an_wavelet_mlp    = list(base_model = ts_mlp(ts_norm_an()), ranges = list(size = 1:10, decay = seq(0, 1, 1/20), 
-  #                                                                          maxit=700)),
-  #an_wavelet_conv1d = list(base_model = ts_conv1d(ts_norm_an()), ranges = list(epochs=700))
+  diff_wavelet_conv1d = list(base_model = ts_conv1d(ts_norm_diff()), ranges = list(epochs=700)),
+  gmm_wavelet_lstm   = list(base_model = ts_lstm(ts_norm_gminmax()), ranges = list(epochs=700)),
+  gmm_wavelet_elm    = list(base_model = ts_elm(ts_norm_gminmax()), ranges = list(nhid = 1:20, actfun=c('sig', 'radbas', 
+                                                                                                'tribas', 'relu', 'purelin'))),
+  gmm_wavelet_svm    = list(base_model = ts_svm(ts_norm_gminmax()), ranges = list(kernel=c("radial", "poly", "linear", 
+                                                                                           "sigmoid"),
+                                                                          epsilon=seq(0, 1, 1/20), cost=seq(1, 10, 1))),
+  gmm_wavelet_mlp    = list(base_model = ts_mlp(ts_norm_gminmax()), ranges = list(size = 1:10, decay = seq(0, 1, 1/20), 
+                                                                                  maxit=700)),
+  gmm_wavelet_conv1d = list(base_model = ts_conv1d(ts_norm_gminmax()), ranges = list(epochs=700)),
+  an_wavelet_lstm   = list(base_model = ts_lstm(ts_norm_an()), ranges = list(epochs=700)),
+  an_wavelet_elm    = list(base_model = ts_elm(ts_norm_an()), ranges = list(nhid = 1:20, actfun=c('sig', 'radbas', 
+                                                                                                  'tribas', 'relu', 'purelin'))),
+  an_wavelet_svm    = list(base_model = ts_svm(ts_norm_an()), ranges = list(kernel=c("radial", "poly", "linear", 
+                                                                                     "sigmoid"),
+                                                                            epsilon=seq(0, 1, 1/20), cost=seq(1, 10, 1))),
+  an_wavelet_mlp    = list(base_model = ts_mlp(ts_norm_an()), ranges = list(size = 1:10, decay = seq(0, 1, 1/20), 
+                                                                            maxit=700)),
+  an_wavelet_conv1d = list(base_model = ts_conv1d(ts_norm_an()), ranges = list(epochs=700))
 )  
 
 
@@ -127,13 +127,13 @@ integrateAndSaveResults("results")
 ###############################################################################################################################
 # --- INDIVIDUAL ADJUST------------------------------------------------------------------------------------------------------ #
 ###############################################################################################################################
-AnoTeste = 2022
+AnoTeste = 2019
 remove_anos_finais = max(year(dataset$Data)) - AnoTeste
 TipoMLM = names(PRE_MLM)[1]
-product = "hydrous"
-state = "GO"
-base_model = PRE_MLM$gmm_wavelet_lstm$base_model
-ranges = PRE_MLM$gmm_wavelet_lstm$ranges
+product = "anhydrous"
+state = "MT"
+base_model = PRE_MLM$an_wavelet_lstm$base_model
+ranges = PRE_MLM$an_wavelet_lstm$ranges
 
 print("=================================================================================")
 print(paste0(TipoMLM, " - Etanol ", product, " - ", state, " - Teste em ", AnoTeste))
