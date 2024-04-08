@@ -26,7 +26,7 @@ for(state in states){
     }else{print("PRODUCT NOT SPECIFIED CORRECTLY")}
     
     p_adf <- suppressWarnings(adf.test(x=ts(data), alternative="stationary")$p.value)
-    p_kpss <- suppressWarnings(kpss.test(x=ts(data))$p.value)
+    p_kpss <- suppressWarnings(kpss.test(x=ts(data), null = "Trend")$p.value)
     
     cat("\n Pelo teste ADF a série temporal", state, "|", etanol, "é",
         if(p_adf < 0.05){
