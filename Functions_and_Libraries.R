@@ -12,7 +12,6 @@ library(zoo)
 library(corrplot)
 library(reticulate)
 library(lubridate)
-#library(TSPred) # To use Wavelet library
 library(tspredit)
 
 
@@ -336,54 +335,3 @@ integrateAndSaveResults <- function(subdir) {
   write.csv(combinedDF, file = "results/IntegratedResults.csv", row.names = FALSE)
 }
 
-
-# -------------------------------------------------------------------------------------------------------------------------- #
-#   2.7) Function to performa Wavelet preprocessing (Wavelet transform smoothing)
-F_WAVELET <- function(data, scenario = ""){
-  # 1) Selecting the best filter
-  Best_R2_Test = -1000
-  for(filter in c("haar", "d4", "la8", "bl14", "c6")){
-    # Performing the Discrete Wavelet Transform
-    wt <- TSPred::WaveletT(data, filter=filter)
-    
-    # Replace the wavelet trend components with values equal to zero
-    wt_ct <- attr(wt,"wt_obj")
-    n <- length(wt_ct@V)
-    for (i in 1:length(wt_ct@W)) {
-      wt_ct@W[[i]] <- as.matrix(rep(0, length(wt_ct@W[[i]])), ncol=1)
-    }
-    
-    # Performs the inverse wavelet transform, considering the wavelet trend components being equal to zero
-    yhat <- TSPred::WaveletT.rev(pred=NULL, wt_ct)
-    
-    #R2_Test calculation
-    R2_Test <- 1 - (sum(abs(data-yhat)^2) / sum((data - mean(data))^2))
-    if(R2_Test>Best_R2_Test){
-      Best_R2_Test <- R2_Test
-      Best_filter <- filter
-    }
-  }
-  
-  # 2) Using the best filter
-  wt <- TSPred::WaveletT(data, filter=Best_filter)
-  
-  wt_ct <- attr(wt,"wt_obj")
-  n <- length(wt_ct@V)
-  for (i in 1:length(wt_ct@W)) {
-    wt_ct@W[[i]] <- as.matrix(rep(0, length(wt_ct@W[[i]])), ncol=1)
-  }
-  
-  yhat <- TSPred::WaveletT.rev(pred=NULL, wt_ct)
-  
-  # 3) Original data vs. inverse wavelet-based data comparison
-  plot(data, type="l", col="blue",
-  main = paste0(scenario, " | R2=", round(Best_R2_Test, digits=3), " | Filter=", Best_filter))
-  lines(yhat, col="red")
-  legend("topleft",
-         legend=c("Original data", "Preprocessed data"),
-         col=c("blue", "red"),
-         lty=1,
-         cex=0.8)
-  
-  return(yhat)
-}
